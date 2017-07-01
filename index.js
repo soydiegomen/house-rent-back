@@ -12,6 +12,7 @@ app.use(cors())
 
 // Load the routes ("controllers" -ish)
 app.use('/api', require('./tv-shows/router'));
+app.use('/api', require('./users/router'));
 
 // Export the app instance for unit testing via supertest
 module.exports = app

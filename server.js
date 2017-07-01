@@ -3,7 +3,7 @@ var app = require('./index');
 	config = require('./config');
 
 // Connection to DB
-mongoose.connect('mongodb://'+ config.mongodb.host +'/tvshows', function(err, res) {
+mongoose.connect('mongodb://'+ config.mongodb.host +'/houseRent', function(err, res) {
   if(err) throw err;
   console.log('Connected to Database');
 });
