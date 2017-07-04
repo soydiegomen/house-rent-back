@@ -1,12 +1,13 @@
-var mongoose = require('mongoose');  
-var userModel = require('./user-model');
+'use strict';
+
+var UserModel = require('./user-model');
 
 //POST - Insert a new User in the DB
 exports.addUser = function(req, res) {  
     console.log('POST');
     console.log(req.body);
 
-    var newUser = new userModel({
+    var newUser = new UserModel({
         name:    req.body.name,
         email:     req.body.email,
         password:  req.body.password,
@@ -23,11 +24,11 @@ exports.addUser = function(req, res) {
 
 //GET - Return all users in the DB
 exports.getAllUsers = function(req, res) {  
-    userModel.find(function(err, users) {
+    UserModel.find(function(err, users) {
         if(err) 
             res.send(500, err.message);
 
-        console.log('GET /users')
+        console.log('GET /users');
         res.status(200).jsonp(users);
     });
 };

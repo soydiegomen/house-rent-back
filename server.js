@@ -1,4 +1,6 @@
-var app = require('./index');
+'use strict';
+
+var app = require('./index'),
 	mongoose = require('mongoose'),
 	config = require('./config');
 
@@ -12,9 +14,9 @@ mongoose.connect('mongodb://'+ config.mongodb.host +'/houseRent', function(err, 
 // The server should be mostly "glue" code to set things up and
 // then start listening
 app.listen(config.express.port, config.express.ip, function (error) {
-  if (error) {
-    log.error('Unable to listen for connections', error)
-    process.exit(10)
+  if(error){
+    console.log('Unable to listen for connections', error);
+    process.exit(10);
   }
   console.log('Node server running on http://' + config.express.ip + ':' +config.express.port);
-})
+});
