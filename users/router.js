@@ -7,4 +7,9 @@ router.route('/users')
 	.get(userCtrl.getAllUsers)
 	.post(userCtrl.addUser);
 
+router.route('/user/:id')
+	.get(userCtrl.getById)
+	.put(userCtrl.updateUser)
+	.delete(userCtrl.deleteUser);
+
 module.exports = router;
