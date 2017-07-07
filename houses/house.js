@@ -13,8 +13,19 @@ exports.getAllHouses = function(req, res) {
     });
 };
 
+//GET - Return a House with specified ID
+exports.getById = function(req, res) {  
+    HouseModel.findById(req.params.id, function(err, house) {
+        if(err) 
+            return res.send(500, err.message);
 
-//POST - Insert a new User in the DB
+        console.log('GET /house/' + req.params.id);
+        res.status(200).jsonp(house);
+    });
+};
+
+
+//POST - Insert a new House in the DB
 exports.addHouse = function(req, res) {  
     console.log('POST');
     console.log(req.body);
@@ -36,5 +47,16 @@ exports.addHouse = function(req, res) {
         if(err) 
             return res.status(500).send( err.message);
         res.status(200).jsonp(house);
+    });
+};
+
+//DELETE - Delete a House with specified ID
+exports.deleteHouse = function(req, res) {  
+    HouseModel.findById(req.params.id, function(err, house) {
+        house.remove(function(err) {
+            if(err) 
+                return res.status(500).send(err.message);
+            res.status(200).send();
+        });
     });
 };
