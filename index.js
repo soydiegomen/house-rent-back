@@ -15,6 +15,7 @@ app.use(cors());
 // Load the routes ("controllers" -ish)
 app.use('/api', require('./users/router'));
 app.use('/api', require('./houses/router'));
+app.use('/api', require('./house-metrics/router'));
 
 // Export the app instance for unit testing via supertest
 module.exports = app;

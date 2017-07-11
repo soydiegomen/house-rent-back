@@ -9,6 +9,7 @@ router.route('/houses')
 
 router.route('/house/:id')
 	.get(houseCtrl.getById)
+	.put(houseCtrl.updateHouse)
 	.delete(houseCtrl.deleteHouse);
 
 module.exports = router;

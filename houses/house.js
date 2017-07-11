@@ -50,6 +50,29 @@ exports.addHouse = function(req, res) {
     });
 };
 
+//PUT - Update a register already exists
+exports.updateHouse = function(req, res) {  
+    HouseModel.findById(req.params.id, function(err, house) {
+        house.userId   = req.body.userId;
+        house.title    = req.body.title;
+        house.price = req.body.price;
+        house.priceType  = req.body.priceType;
+        house.propertyType = req.body.propertyType;
+        house.operationType = req.body.operationType;
+        house.services  = req.body.services;
+        house.status = req.body.status;
+        house.address = req.body.address;
+        house.contact  = req.body.contact;
+        house.lastModification = new Date();
+
+        house.save(function(err) {
+            if(err) 
+                return res.status(500).send(err.message);
+            res.status(200).jsonp(house);
+        });
+    });
+};
+
 //DELETE - Delete a House with specified ID
 exports.deleteHouse = function(req, res) {  
     HouseModel.findById(req.params.id, function(err, house) {
