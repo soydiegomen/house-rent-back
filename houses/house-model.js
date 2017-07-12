@@ -4,7 +4,7 @@ var mongoose = require('mongoose'),
     Schema   = mongoose.Schema;
 
 var houseSchema = new Schema({  
-  userId:    { type: mongoose.Schema.Types.ObjectId },
+  userId:    { type: mongoose.Schema.Types.ObjectId, required: true },
   title:    { type: String, required: true  },
   price:    { type: Number },
   priceType:    { type: String, required: true, enum:
