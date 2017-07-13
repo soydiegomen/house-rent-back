@@ -17,7 +17,7 @@ app.use('/api', require('./users/router'));
 app.use('/api', require('./houses/router'));
 app.use('/api', require('./house-metrics/router'));
 app.use('/api', require('./files/router'));
-app.use('/api', require('./house-files/router'));
+app.use('/api', require('./house-files	/router'));
 
 // Export the app instance for unit testing via supertest
 module.exports = app;
