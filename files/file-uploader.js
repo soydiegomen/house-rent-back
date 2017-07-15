@@ -2,48 +2,60 @@
 
 var FileModel = require('./file-model');
 var multer  =   require('multer');
-var path = require('path');
+//var path = require('path');
+var fileContainer = 'uploads';
+var containerPath = './' + fileContainer;
+var defaultFileStatus = 'New';
 
-//POST - Insert a new File in the DB
-exports.addFile = function(req, res) {  
-    console.log(req.body);
-
-    var newFile = new FileModel({
-        userId:  req.body.userId,
-        fileUrl:    req.body.fileUrl,
-        name:  req.body.name,
-        fileType:  req.body.fileType,
-        size:    req.body.size,
-        status:  req.body.status
-    });
-
-    newFile.save(function(err, file) {
-        if(err) 
-            return res.status(500).send( err.message);
-        res.status(200).jsonp(file);
-    });
-};
 
 /*Setup Multer*/
 var storage =   multer.diskStorage({
   destination: function (req, file, callback) {
-    callback(null, './uploads');
+    callback(null, containerPath);
   },
   filename: function (req, file, callback) {
-    //callback(null, file.fieldname + '-' + Date.now());
-    callback(null, file.fieldname + '-' + Date.now() + path.extname(file.originalname));
-    //callback(null, Date.now() + file.originalname);
-  }
+
+        var newFileName =  Date.now() + '-' + file.originalname;
+        var fileUrl = fileContainer + '/' + newFileName;
+        
+        var newFile = new FileModel({
+            userId:  '59659ecf9fbf3e320d000002',
+            fileUrl:    fileUrl ,
+            name:  file.originalname,
+            fileType:  file.mimetype,
+            //size:    file.size,
+            status:  defaultFileStatus
+        });
+
+        newFile.save(function(err, savedfile) {
+            if(err) {
+                console.log('Some error happend');
+                //return res.status(500).send( err.message);
+            }else{
+                console.log(savedfile);
+            }
+                
+        });
+        callback(null, newFileName);
+    }
 });
 
-var upload = multer({ storage : storage}).single('userPhoto');
 
+var upload = multer({ storage : storage}).single('userPhoto');
+/*
+var app = express()
+
+app.use(multer(config))
+*/
 //POST - Insert a new File in the DB
 exports.uploadFile = function(req, res) {  
     upload(req,res,function(err) {
         if(err) {
             return res.status(500).send(err.message);
         }
-        res.status(200).jsonp({ result : 'ok'});
+
+        
+        //
+        res.status(200).jsonp( { result : 'ok'});
     });
 };
