@@ -9,7 +9,7 @@ var fileSchema = new Schema({
   name:    { type: String, required: true },
   fileType:    { type: String, required: true },
   size:    { type: Number },
-  status:    { type: Boolean, enum:
+  status:    { type: String, enum:
     ['New', 'Deleted'] },
   creationDate:     { type: Date, default: Date.now },
   lastModification:     { type: Date, default: Date.now }
