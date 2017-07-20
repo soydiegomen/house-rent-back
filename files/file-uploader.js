@@ -2,16 +2,19 @@
 
 var FileModel = require('./file-model');
 var multer  =   require('multer');
-//var path = require('path');
+
+//Class variables
 var fileContainer = 'uploads';
 var containerPath = './' + fileContainer;
 var defaultFileStatus = 'New';
+//File max length 1MB
+var maxSize = 1024 * 1024;
 
-
-/*Setup Multer*/
 /*Setup Multer*/
 var storage =   multer.diskStorage({
   destination: function (req, file, callback) {
+    //Is posible define a url out of project directory
+    //callback(null, '/proyectos/home/temp');
     callback(null, containerPath);
   },
   filename: function (req, file, callback) {
@@ -23,6 +26,7 @@ var storage =   multer.diskStorage({
 
 function fileFilter (req, file, callback) {
     console.log('In fileFilter');
+    console.log(file);
     //TODO userId get from sesión. For MVP culd be hardcoded
     var userId = '59659ecf9fbf3e320d000002';
     //For save file the form must have a userId field
@@ -55,13 +59,16 @@ function fileFilter (req, file, callback) {
         req.body.newFileName = newFileName;
 
         // To accept the file pass `true`, like so:
-        callback(null, true)
+        callback(null, true);
     });
 }
+
+//When limit is exced the server return the json {"error":"File too large"}
 var upload = multer({ 
-        storage : storage, 
-        fileFilter : fileFilter })
-        .single('userPhoto');
+            storage : storage, 
+            fileFilter : fileFilter,
+            limits: { fileSize: maxSize } 
+        }).single('userPhoto');
 
 //POST - Insert a new File in the DB
 exports.uploadFile = function(req, res) {  
