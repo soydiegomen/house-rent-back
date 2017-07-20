@@ -25,8 +25,6 @@ var storage =   multer.diskStorage({
 });
 
 function fileFilter (req, file, callback) {
-    console.log('In fileFilter');
-    console.log(file);
     //TODO userId get from sesión. For MVP culd be hardcoded
     var userId = '59659ecf9fbf3e320d000002';
     //For save file the form must have a userId field
