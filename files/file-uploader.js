@@ -2,11 +2,17 @@
 
 var FileModel = require('./file-model');
 var multer  =   require('multer');
+var sharp = require('sharp');
+var fs = require('fs');
 
 //Class variables
-var fileContainer = 'uploads';
-var containerPath = './' + fileContainer;
+// containerPath is the fisical path where the file is saved
+var containerPath = './uploads';
+// publicContainer is used for the Front app for build the relative path
+var publicContainer = 'uploads';
 var defaultFileStatus = 'New';
+//This prefix is used for optimized file. This files will be used for the Front app
+const FILE_PREFIX = 'min-';
 //File max length 1MB
 var maxSize = 1024 * 1024;
 
@@ -33,9 +39,11 @@ function fileFilter (req, file, callback) {
         //This instruction avoid save the file in the sever
         callback(null, false);
     }
-
+    
     var newFileName =  Date.now() + '-' + file.originalname;
-    var fileUrl = fileContainer + '/' + newFileName;
+    // fileUrl is used for the front project for retrive the file
+    //The file who is saved for Multer module will be deleted afeter create a optimized file
+    var fileUrl = publicContainer + '/' + FILE_PREFIX + newFileName;
 
     var newFile = new FileModel({
         userId:  userId,
@@ -68,14 +76,36 @@ var upload = multer({
             limits: { fileSize: maxSize } 
         }).single('userPhoto');
 
+function resizeImage(filePath, fileName){
+    console.log('Start resize image');
+    var fileToResize = filePath + '/' + fileName;
+    var fileDestiny = filePath + '/' + FILE_PREFIX + fileName;
+    sharp(fileToResize)
+      .resize(800)
+      .toFile(fileDestiny)
+      .then(function() {
+        //delete original file
+        fs.unlinkSync(fileToResize);
+      })
+      .catch( function(err) {
+        console.log('Some error happend', err);
+      });
+}
+
 //POST - Insert a new File in the DB
 exports.uploadFile = function(req, res) {  
     upload(req,res,function(err) {
         if(err) {
             //Return to user the json error
             return res.status(500).jsonp({ error : err.message });
+        }else{
+            //Si no hubo errores se redimenciona la imagen
+            resizeImage( containerPath, req.body.newFileName );
+
         }
         //Return saved file data
         res.status(200).jsonp( req.body.savedFile );
     });
+    
 };
+
