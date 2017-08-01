@@ -31,6 +31,9 @@ var houseSchema = new Schema({
   		facebook: { type: String },
   		webSite: { type: String }
   },
+  noBedrooms:    { type: Number, required: true },
+  noBathrooms:    { type: Number, required: true },
+  noParking:    { type: Number, required: true },
   creationDate:     { type: Date, default: Date.now, required: true },
   lastModification:     { type: Date, default: Date.now, required: true }
 });

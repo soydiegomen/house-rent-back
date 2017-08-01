@@ -40,7 +40,10 @@ exports.addHouse = function(req, res) {
         services:   req.body.services,
         status:  req.body.status,
         address:  req.body.address,
-        contact:   req.body.contact
+        contact:   req.body.contact,
+        noBedrooms:  req.body.noBedrooms,
+        noBathrooms:  req.body.noBathrooms,
+        noParking:   req.body.noParking
     });
 
     newHouse.save(function(err, house) {
@@ -63,6 +66,9 @@ exports.updateHouse = function(req, res) {
         house.status = req.body.status;
         house.address = req.body.address;
         house.contact  = req.body.contact;
+        house.noBedrooms =  req.body.noBedrooms;
+        house.noBathrooms =  req.body.noBathrooms;
+        house.noParking =   req.body.noParking;
         house.lastModification = new Date();
 
         house.save(function(err) {
