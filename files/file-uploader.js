@@ -16,12 +16,46 @@ const FILE_PREFIX = 'min-';
 //File max length 1MB
 var maxSize = 1024 * 1024;
 
+/*File Helpers*/
+//Build and create the destination path
+function getDestinationPath(basePath){
+    var currentDate = new Date();
+    var currentYear = currentDate.getFullYear();
+    var currentMonth = currentDate.getMonth() + 1;
+    var currentDay = currentDate.getDate();
+
+    //Example: /uploads/2017/09/31
+    //var finalPath = basePath + currentYear + '/' + currentMonth + '/' + currentDay;
+    var finalPath =  '/' + currentYear;
+
+    if (!fs.existsSync(basePath + finalPath)){
+        fs.mkdirSync(basePath + finalPath);
+    }
+
+    //Append Month
+    finalPath = finalPath + '/' + currentMonth;
+
+    if (!fs.existsSync(basePath + finalPath)){
+        fs.mkdirSync(basePath + finalPath);
+    }
+
+    //Append Day
+    finalPath = finalPath + '/' + currentDay;
+
+    if (!fs.existsSync(basePath + finalPath)){
+        fs.mkdirSync(basePath + finalPath);
+    }
+
+    return finalPath;
+}
+
 /*Setup Multer*/
 var storage =   multer.diskStorage({
   destination: function (req, file, callback) {
     //Is posible define a url out of project directory
     //callback(null, '/proyectos/home/temp');
-    callback(null, containerPath);
+    
+    callback(null, req.body.destinationPath);
   },
   filename: function (req, file, callback) {
         //En fileFilter definimos el nombre que tendra el archivo 
@@ -40,10 +74,17 @@ function fileFilter (req, file, callback) {
         callback(null, false);
     }
     
+    var destinationPath = getDestinationPath(containerPath);
+    //Path for save the new file
+    var pathForSaveFile = containerPath + destinationPath;
+    //Relative path (this is for define the relative path used for consume the file, using another aplication)
+    var relativePath = publicContainer + destinationPath;
+
     var newFileName =  Date.now() + '-' + file.originalname;
+    var tempFileName = FILE_PREFIX + newFileName 
     // fileUrl is used for the front project for retrive the file
     //The file who is saved for Multer module will be deleted afeter create a optimized file
-    var fileUrl = publicContainer + '/' + FILE_PREFIX + newFileName;
+    var fileUrl = relativePath + '/' + tempFileName;
 
     var newFile = new FileModel({
         userId:  userId,
@@ -62,7 +103,13 @@ function fileFilter (req, file, callback) {
         }
         //Set file row info in request body for return data to the user
         req.body.savedFile = savedfile;
+
+        //newFileName is the final file, this will be optimized
         req.body.newFileName = newFileName;
+        //tempFileName is a temporal file created just for dowload the file
+        req.body.tempFileName = tempFileName;
+        //Final path for save the file
+        req.body.destinationPath = pathForSaveFile;
 
         // To accept the file pass `true`, like so:
         callback(null, true);
@@ -76,10 +123,10 @@ var upload = multer({
             limits: { fileSize: maxSize } 
         }).single('userPhoto');
 
-function resizeImage(filePath, fileName){
+function resizeImage(filePath, fileName, tempFileName){
     console.log('Start resize image');
     var fileToResize = filePath + '/' + fileName;
-    var fileDestiny = filePath + '/' + FILE_PREFIX + fileName;
+    var fileDestiny = filePath + '/' + tempFileName;
     sharp(fileToResize)
       .resize(800)
       .toFile(fileDestiny)
@@ -92,6 +139,7 @@ function resizeImage(filePath, fileName){
       });
 }
 
+
 //POST - Insert a new File in the DB
 exports.uploadFile = function(req, res) {  
     upload(req,res,function(err) {
@@ -100,7 +148,9 @@ exports.uploadFile = function(req, res) {
             return res.status(500).jsonp({ error : err.message });
         }else{
             //Si no hubo errores se redimenciona la imagen
-            resizeImage( containerPath, req.body.newFileName );
+            resizeImage( req.body.destinationPath, 
+                req.body.newFileName,
+                req.body.tempFileName );
 
         }
         //Return saved file data
