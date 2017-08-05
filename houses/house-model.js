@@ -38,4 +38,4 @@ var houseSchema = new Schema({
   lastModification:     { type: Date, default: Date.now, required: true }
 });
 
-module.exports = mongoose.model('HouseModel', houseSchema);
+module.exports = mongoose.model('House', houseSchema);
