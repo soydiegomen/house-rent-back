@@ -7,7 +7,7 @@ var houseSchema = new Schema({
   userId:    { type: mongoose.Schema.Types.ObjectId, required: true },
   title:    { type: String, required: true  },
   price:    { type: Number },
-  priceType:    { type: String, required: true, enum:
+  priceType:    { type: String, enum:
     ['Mensual', 'Semanal', 'Dia', 'Noche', 'Compra', 'Otro']},
   propertyType:    { type: String, required: true, enum:
     ['Casa', 'Departamento', 'Oficina', 'Terreno', 'Salon', 'Otro']},
