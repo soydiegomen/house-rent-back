@@ -46,7 +46,7 @@ exports.addHouse = function(req, res) {
 
     newHouse.save(function(err, house) {
         if(err){
-            return res.status(500).send( err.message);
+            return res.status(500).jsonp( err);
         }
         res.status(200).jsonp(house);
     });
