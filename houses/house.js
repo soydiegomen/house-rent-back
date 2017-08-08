@@ -5,10 +5,10 @@ var HouseModel = require('./house-model');
 //GET - Return all houses in the DB
 exports.getAllHouses = function(req, res) {  
     HouseModel.find(function(err, houses) {
-        if(err) 
+        if(err){
             res.send(500, err.message);
+        }
 
-        console.log('GET /houses');
         res.status(200).jsonp(houses);
     });
 };
@@ -16,10 +16,10 @@ exports.getAllHouses = function(req, res) {
 //GET - Return a House with specified ID
 exports.getById = function(req, res) {  
     HouseModel.findById(req.params.id, function(err, house) {
-        if(err) 
+        if(err){
             return res.send(500, err.message);
+        }
 
-        console.log('GET /house/' + req.params.id);
         res.status(200).jsonp(house);
     });
 };
@@ -27,8 +27,6 @@ exports.getById = function(req, res) {
 
 //POST - Insert a new House in the DB
 exports.addHouse = function(req, res) {  
-    console.log('POST');
-    console.log(req.body);
 
     var newHouse = new HouseModel({
         userId:    req.body.userId,
@@ -47,8 +45,9 @@ exports.addHouse = function(req, res) {
     });
 
     newHouse.save(function(err, house) {
-        if(err) 
+        if(err){
             return res.status(500).send( err.message);
+        }
         res.status(200).jsonp(house);
     });
 };
@@ -72,8 +71,9 @@ exports.updateHouse = function(req, res) {
         house.lastModification = new Date();
 
         house.save(function(err) {
-            if(err) 
+            if(err){ 
                 return res.status(500).send(err.message);
+            }
             res.status(200).jsonp(house);
         });
     });
@@ -83,8 +83,9 @@ exports.updateHouse = function(req, res) {
 exports.deleteHouse = function(req, res) {  
     HouseModel.findById(req.params.id, function(err, house) {
         house.remove(function(err) {
-            if(err) 
+            if(err){
                 return res.status(500).send(err.message);
+            }
             res.status(200).send();
         });
     });
