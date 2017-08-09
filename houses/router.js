@@ -12,4 +12,7 @@ router.route('/house/:id')
 	.put(houseCtrl.updateHouse)
 	.delete(houseCtrl.deleteHouse);
 
+router.route('/houses/byStatus/:status')
+	.get(houseCtrl.getHousesByStatus);
+
 module.exports = router;

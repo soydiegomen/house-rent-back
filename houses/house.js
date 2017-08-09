@@ -90,3 +90,24 @@ exports.deleteHouse = function(req, res) {
         });
     });
 };
+
+//GET - Return the last publish houses
+exports.getHousesByStatus = function(req, res) {  
+    var status = req.params.status ? req.params.status : 'Publicado';
+    HouseModel.find({ 
+        status : status
+    })
+    .sort( 
+        //order DESC
+        { 
+            creationDate : -1 
+        }
+    )
+    .exec(function(err, answer) {
+        if(err){
+            res.send(500, err.message);
+        }
+
+        res.status(200).jsonp(answer);
+    });
+};
