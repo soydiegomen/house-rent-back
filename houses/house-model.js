@@ -6,6 +6,7 @@ var mongoose = require('mongoose'),
 var houseSchema = new Schema({  
   userId:    { type: mongoose.Schema.Types.ObjectId, required: true },
   title:    { type: String, required: true  },
+  summary:   { type: String  },
   price:    { type: Number },
   /* priceType must be required becouse mongoose force this for enum data types */
   priceType:    { type: String, required: true, enum:
@@ -30,7 +31,7 @@ var houseSchema = new Schema({
   		phone: { type: String },
   		mail: { type: String },
   		facebook: { type: String },
-  		webSite: { type: String }
+  		website: { type: String }
   },
   noBedrooms:    { type: Number, required: true },
   noBathrooms:    { type: Number, required: true },

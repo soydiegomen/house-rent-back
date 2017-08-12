@@ -31,6 +31,7 @@ exports.addHouse = function(req, res) {
     var newHouse = new HouseModel({
         userId:    req.body.userId,
         title:     req.body.title,
+        summary:   req.body.summary,
         price:  req.body.price,
         priceType:   req.body.priceType,
         propertyType:  req.body.propertyType,
@@ -57,6 +58,7 @@ exports.updateHouse = function(req, res) {
     HouseModel.findById(req.params.id, function(err, house) {
         house.userId   = req.body.userId;
         house.title    = req.body.title;
+        house.summary     = req.body.summary;
         house.price = req.body.price;
         house.priceType  = req.body.priceType;
         house.propertyType = req.body.propertyType;
