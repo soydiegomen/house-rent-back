@@ -1,5 +1,5 @@
 'use strict';
-
+var mongoose = require('mongoose');  
 var HouseFileModel = require('./house-file-model');
 
 //GET - Return all house files in the DB
@@ -15,6 +15,29 @@ exports.getAllHouseFiles = function(req, res) {
 //GET - Return a House file with specified ID
 exports.getById = function(req, res) {  
     HouseFileModel.findById(req.params.id, function(err, houseFile) {
+        if(err) 
+            return res.send(500, err.message);
+
+        res.status(200).jsonp(houseFile);
+    });
+};
+
+//GET - Return a House file with specified ID
+exports.getFileDetailsByHouse = function(req, res) {  
+    HouseFileModel.aggregate([
+            {
+              $lookup:
+                {
+                  from: 'files',
+                  localField: 'fileId',
+                  foreignField: '_id',
+                  as: 'file'
+                }
+           },
+           {
+              $match: { 'houseId': new mongoose.Types.ObjectId(req.params.houseId) }
+           }
+        ], function(err, houseFile) {
         if(err) 
             return res.send(500, err.message);
 
