@@ -481,10 +481,13 @@
 	"expanded_folders":
 	[
 		"/proyectos/home/node/house-rent-back",
+		"/proyectos/home/node/house-rent-back/house-files",
 		"/proyectos/home/node/house-rent-back/houses"
 	],
 	"file_history":
 	[
+		"/proyectos/home/node/house-rent-back/house-files/house-file.js",
+		"/proyectos/home/node/house-rent-back/house-files/router.js",
 		"/proyectos/home/node/house-rent-back/houses/router.js",
 		"/proyectos/home/node/house-rent-back/houses/house-model.js",
 		"/proyectos/home/node/house-rent-back/houses/house.js",
@@ -610,9 +613,7 @@
 		"/Applications/MAMP/htdocs/devstudio/chailate/js/app/widgets/imageModal/image-modal.html",
 		"/Applications/MAMP/htdocs/devstudio/chailate/js/app/widgets/gallery/img-gallery.html",
 		"/Applications/MAMP/htdocs/devstudio/chailate/jsons/portfolio-diseno.json",
-		"/Applications/MAMP/htdocs/devstudio/chailate/jsons/portfolio-photos.json",
-		"/Applications/MAMP/htdocs/devstudio/chailate/js/app/widgets/devGallery/dev-gallery.html",
-		"/Applications/MAMP/htdocs/devstudio/chailate/js/app/core/analyticsservice.js"
+		"/Applications/MAMP/htdocs/devstudio/chailate/jsons/portfolio-photos.json"
 	],
 	"find":
 	{

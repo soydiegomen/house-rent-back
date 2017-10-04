@@ -13,6 +13,8 @@ router.route('/house-file/:id')
 	.delete(houseFileCtrl.deleteHouseFile);
 
 router.route('/files-of-house/:houseId')
-	.get(houseFileCtrl.getFileDetailsByHouse);
+	.get(houseFileCtrl.getFileDetailsByHouse)
+	.put(houseFileCtrl.updateFilesOfHouse);
+	
 
 module.exports = router;
