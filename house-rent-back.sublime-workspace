@@ -4,6 +4,14 @@
 		"selected_items":
 		[
 			[
+				"hous",
+				"houseFiles"
+			],
+			[
+				"new",
+				"newHouseFile"
+			],
+			[
 				"ho",
 				"homeCtrl"
 			],
@@ -22,14 +30,6 @@
 			[
 				"va",
 				"value"
-			],
-			[
-				"hous",
-				"houseId"
-			],
-			[
-				"new",
-				"newFile"
 			],
 			[
 				"ge",
@@ -439,6 +439,27 @@
 	},
 	"buffers":
 	[
+		{
+			"contents": "'use strict';\nvar mongoose = require('mongoose');  \nvar HouseFileModel = require('./house-file-model');\n\n//GET - Return all house files in the DB\nexports.getAllHouseFiles = function(req, res) {  \n    HouseFileModel.find(function(err, houseFiles) {\n        if(err) \n            res.send(500, err.message);\n\n        res.status(200).jsonp(houseFiles);\n    });\n};\n\n//GET - Return a House file with specified ID\nexports.getById = function(req, res) {  \n    HouseFileModel.findById(req.params.id, function(err, houseFile) {\n        if(err) \n            return res.send(500, err.message);\n\n        res.status(200).jsonp(houseFile);\n    });\n};\n\n//GET - Return a House file with specified ID\nexports.getFileDetailsByHouse = function(req, res) {  \n    HouseFileModel.aggregate([\n            {\n              $lookup:\n                {\n                  from: 'files',\n                  localField: 'fileId',\n                  foreignField: '_id',\n                  as: 'file'\n                }\n           },\n           {\n              $match: { 'houseId': new mongoose.Types.ObjectId(req.params.houseId) }\n           }\n        ], function(err, houseFile) {\n        if(err) \n            return res.send(500, err.message);\n\n        res.status(200).jsonp(houseFile);\n    });\n};\n\n//POST - Insert a new House file in the DB\nexports.addHouseFile = function(req, res) {  \n\n    var newHouseFile = new HouseFileModel({\n        houseId:    req.body.houseId,\n        fileId:     req.body.fileId,\n        isActive:  req.body.isActive\n    });\n\n    newHouseFile.save(function(err, houseFile) {\n        if(err) \n            return res.status(500).send( err.message);\n        res.status(200).jsonp(houseFile);\n    });\n};\n\n//PUT - Update a register already exists\nexports.updateHouseFile = function(req, res) {  \n    HouseFileModel.findById(req.params.id, function(err, houseFile) {\n        houseFile.houseId   = req.body.houseId;\n        houseFile.fileId    = req.body.fileId;\n        houseFile.isActive = req.body.isActive;\n        houseFile.lastModification = new Date();\n\n        houseFile.save(function(err) {\n            if(err) \n                return res.status(500).send(err.message);\n            res.status(200).jsonp(houseFile);\n        });\n    });\n};\n\n//PUT - Update a register already exists\nexports.updateFilesOfHouse = function(req, res) {  \n    var houseId = req.params.houseId;\n\n    HouseFileModel.find({\n        houseId: new mongoose.Types.ObjectId(houseId)\n    })\n    .exec(function(err, houseFiles) {\n        if(err) \n            res.send(500, err.message);\n\n        //Borrar todos los archivos\n        if(houseFiles.length > 0){\n            //TODO: Si la imagen esta dentro del arreglo de las imagenes a agregar\n            //no se debería borrar\n            houseFiles.forEach(function(item) {\n                //TODO: Debemos borrar también los archivos de forma forma física\n                item.remove(function(err) {\n                    if(err){\n                        //TODO: Manejar cuando hay un error\n                        //return res.status(500).send(err.message);\n                        console.log('Error al borrar una imagen' + err.message);\n                    }\n                });\n            });\n        }\n\n        var arrayFiles = req.body.files;\n        var arrayNewFiles = [];\n        if(arrayFiles.length > 0){\n            req.body.files.forEach(function(fileId) {\n                var newHouseFile = new HouseFileModel({\n                    houseId:    houseId,\n                    fileId:     fileId,\n                    isActive:  true\n                });\n\n                newHouseFile.save(function(err, houseFile) {\n                    if(err){\n                        //TODO: Manejar cuando hay un error\n                        //return res.status(500).send(err.message);\n                        console.log('Error al borrar una imagen' + err.message);\n                    }\n                    arrayNewFiles.push(houseFile);\n                });\n            });\n        }\n\n        res.status(200).jsonp(arrayNewFiles);\n    });\n};\n\n//DELETE - Delete a House file with specified ID\nexports.deleteHouseFile = function(req, res) {  \n    HouseFileModel.findById(req.params.id, function(err, houseFile) {\n        houseFile.remove(function(err) {\n            if(err) \n                return res.status(500).send(err.message);\n            res.status(200).send();\n        });\n    });\n};",
+			"file": "house-files/house-file.js",
+			"file_size": 4239,
+			"file_write_time": 131515606350000000,
+			"settings":
+			{
+				"buffer_size": 4400,
+				"encoding": "UTF-8",
+				"line_ending": "Unix"
+			}
+		},
+		{
+			"file": "house-files/router.js",
+			"settings":
+			{
+				"buffer_size": 499,
+				"encoding": "UTF-8",
+				"line_ending": "Unix"
+			}
+		}
 	],
 	"build_system": "",
 	"build_system_choices":
@@ -617,7 +638,7 @@
 	],
 	"find":
 	{
-		"height": 30.0
+		"height": 43.0
 	},
 	"find_in_files":
 	{
@@ -654,6 +675,7 @@
 		"case_sensitive": false,
 		"find_history":
 		[
+			"getFileDetailsByHouse",
 			"summary",
 			"console",
 			"saveHouse",
@@ -780,8 +802,7 @@
 			"sendComments",
 			"dataservice",
 			"border",
-			"hover",
-			"img"
+			"hover"
 		],
 		"highlight": true,
 		"in_selection": false,
@@ -819,8 +840,67 @@
 	"groups":
 	[
 		{
+			"selected": 0,
 			"sheets":
 			[
+				{
+					"buffer": 0,
+					"file": "house-files/house-file.js",
+					"semi_transient": false,
+					"settings":
+					{
+						"buffer_size": 4400,
+						"regions":
+						{
+						},
+						"selection":
+						[
+							[
+								4039,
+								4039
+							]
+						],
+						"settings":
+						{
+							"syntax": "Packages/JavaScript/JavaScript.sublime-syntax",
+							"tab_size": 4,
+							"translate_tabs_to_spaces": true
+						},
+						"translation.x": 0.0,
+						"translation.y": 2348.0,
+						"zoom_level": 1.0
+					},
+					"stack_index": 0,
+					"type": "text"
+				},
+				{
+					"buffer": 1,
+					"file": "house-files/router.js",
+					"semi_transient": false,
+					"settings":
+					{
+						"buffer_size": 499,
+						"regions":
+						{
+						},
+						"selection":
+						[
+							[
+								408,
+								429
+							]
+						],
+						"settings":
+						{
+							"syntax": "Packages/JavaScript/JavaScript.sublime-syntax"
+						},
+						"translation.x": 0.0,
+						"translation.y": 0.0,
+						"zoom_level": 1.0
+					},
+					"stack_index": 1,
+					"type": "text"
+				}
 			]
 		}
 	],

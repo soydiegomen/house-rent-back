@@ -104,24 +104,28 @@ exports.updateFilesOfHouse = function(req, res) {
             });
         }
 
-        req.body.files.forEach(function(fileId) {
-            var newHouseFile = new HouseFileModel({
-                houseId:    houseId,
-                fileId:     fileId,
-                isActive:  true
-            });
+        var arrayFiles = req.body.files;
+        var arrayNewFiles = [];
+        if(arrayFiles.length > 0){
+            req.body.files.forEach(function(fileId) {
+                var newHouseFile = new HouseFileModel({
+                    houseId:    houseId,
+                    fileId:     fileId,
+                    isActive:  true
+                });
 
-            newHouseFile.save(function(err, houseFile) {
-                if(err){
-                    //TODO: Manejar cuando hay un error
-                    //return res.status(500).send(err.message);
-                    console.log('Error al borrar una imagen' + err.message);
-                }
-                console.log('Se agrego el archivo', houseFile);
+                newHouseFile.save(function(err, houseFile) {
+                    if(err){
+                        //TODO: Manejar cuando hay un error
+                        //return res.status(500).send(err.message);
+                        console.log('Error al borrar una imagen' + err.message);
+                    }
+                    arrayNewFiles.push(houseFile);
+                });
             });
-        });
+        }
 
-        res.status(200).jsonp(houseFiles);
+        res.status(200).jsonp(arrayNewFiles);
     });
 };
 
