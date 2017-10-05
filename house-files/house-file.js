@@ -2,6 +2,53 @@
 var mongoose = require('mongoose');  
 var HouseFileModel = require('./house-file-model');
 
+/*Helpers*/
+function deleteFilesOfHouse(houseFiles){
+    //Borrar todos los archivos
+    if(houseFiles.length > 0){
+        //TODO: Si la imagen esta dentro del arreglo de las imagenes a agregar
+        //no se debería borrar
+        houseFiles.forEach(function(item) {
+            //TODO: Debemos borrar también los archivos de forma forma física
+            item.remove(function(err) {
+                if(err){
+                    //TODO: Manejar cuando hay un error
+                    console.log('Error al borrar una imagen' + err.message);
+                }
+            });
+        });
+    }   
+}
+
+function saveHouseFiles(arrayFiles, houseId, callback){
+    var arrayNewFiles = [];
+    var filesToSave = arrayFiles.length;
+    
+    arrayFiles.forEach(function(fileId) {
+        var newHouseFile = new HouseFileModel({
+            houseId:    houseId,
+            fileId:     fileId,
+            isActive:  true
+        });
+
+        newHouseFile.save(function(err, houseFile) {
+            if(err){
+                //TODO: Manejar cuando hay un error
+                console.log('Error al borrar una imagen' + err.message);
+            }
+            //Agrego el archivo a un arreglo para reponderlo al request
+            arrayNewFiles.push(houseFile);
+
+            filesToSave--;
+            //Si no hay archivos por guardar respondemos el request para terminar el proceso
+            if(filesToSave === 0){
+                callback(arrayNewFiles);
+                //res.status(200).jsonp(arrayNewFiles);
+            }
+        });
+    });
+}
+
 //GET - Return all house files in the DB
 exports.getAllHouseFiles = function(req, res) {  
     HouseFileModel.find(function(err, houseFiles) {
@@ -88,44 +135,21 @@ exports.updateFilesOfHouse = function(req, res) {
         if(err) 
             res.send(500, err.message);
 
-        //Borrar todos los archivos
-        if(houseFiles.length > 0){
-            //TODO: Si la imagen esta dentro del arreglo de las imagenes a agregar
-            //no se debería borrar
-            houseFiles.forEach(function(item) {
-                //TODO: Debemos borrar también los archivos de forma forma física
-                item.remove(function(err) {
-                    if(err){
-                        //TODO: Manejar cuando hay un error
-                        //return res.status(500).send(err.message);
-                        console.log('Error al borrar una imagen' + err.message);
-                    }
-                });
-            });
-        }
+        //Borrar todos los archivos. Para agregar los que se recibieron como si fueran nuevos
+        deleteFilesOfHouse(houseFiles);
 
         var arrayFiles = req.body.files;
-        var arrayNewFiles = [];
-        if(arrayFiles.length > 0){
-            req.body.files.forEach(function(fileId) {
-                var newHouseFile = new HouseFileModel({
-                    houseId:    houseId,
-                    fileId:     fileId,
-                    isActive:  true
-                });
-
-                newHouseFile.save(function(err, houseFile) {
-                    if(err){
-                        //TODO: Manejar cuando hay un error
-                        //return res.status(500).send(err.message);
-                        console.log('Error al borrar una imagen' + err.message);
-                    }
-                    arrayNewFiles.push(houseFile);
-                });
-            });
+        var filesToSave = arrayFiles.length;
+        
+        if(filesToSave === 0){
+            res.status(200).jsonp([]);
         }
 
-        res.status(200).jsonp(arrayNewFiles);
+        //Save new files
+        saveHouseFiles(arrayFiles, houseId, function(savedFilesArray){
+            res.status(200).jsonp(savedFilesArray);
+        });
+        
     });
 };
 
@@ -139,3 +163,4 @@ exports.deleteHouseFile = function(req, res) {
         });
     });
 };
+
