@@ -5,7 +5,7 @@ var router = require('express').Router();
 
 router.route('/house-files')
 	.get(houseFileCtrl.getAllHouseFiles)
-	.post(houseFileCtrl.addHouseFile);
+	.post(houseFileCtrl.saveFilesOfHouse);
 
 router.route('/house-file/:id')
 	.get(houseFileCtrl.getById)

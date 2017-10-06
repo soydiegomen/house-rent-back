@@ -124,7 +124,18 @@ exports.updateHouseFile = function(req, res) {
     });
 };
 
-//PUT - Update a register already exists
+//POST - Save the files of a house
+exports.saveFilesOfHouse = function(req, res) {  
+    var houseId = req.body.houseId;
+    var arrayFiles = req.body.files;
+
+    //Save new files
+    saveHouseFiles(arrayFiles, houseId, function(savedFilesArray){
+        res.status(200).jsonp(savedFilesArray);
+    });
+};
+
+//PUT - Update the files of a house. First delete the old files, after save all files like they are news
 exports.updateFilesOfHouse = function(req, res) {  
     var houseId = req.params.houseId;
 
