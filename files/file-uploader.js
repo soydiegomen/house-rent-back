@@ -124,10 +124,10 @@ var upload = multer({
         }).single('userPhoto');
 
 function resizeImage(filePath, fileName, tempFileName){
-    console.log('Start resize image');
+    
     var fileToResize = filePath + '/' + fileName;
     var fileDestiny = filePath + '/' + tempFileName;
-    sharp(fileToResize)
+    return sharp(fileToResize)
       .resize(800)
       .toFile(fileDestiny)
       .then(function() {
@@ -147,14 +147,17 @@ exports.uploadFile = function(req, res) {
             //Return to user the json error
             return res.status(500).jsonp({ error : err.message });
         }else{
+            
             //Si no hubo errores se redimenciona la imagen
             resizeImage( req.body.destinationPath, 
                 req.body.newFileName,
-                req.body.tempFileName );
-
+                req.body.tempFileName )
+            .then(function (){
+                //Return saved file data
+                res.status(200).jsonp( req.body.savedFile );            
+            });
         }
-        //Return saved file data
-        res.status(200).jsonp( req.body.savedFile );
+        
     });
     
 };
