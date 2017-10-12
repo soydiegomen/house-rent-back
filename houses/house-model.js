@@ -12,7 +12,7 @@ var houseSchema = new Schema({
   priceType:    { type: String, required: true, enum:
     ['Mensual', 'Semanal', 'Dia', 'Noche', 'Compra', 'Otro']},
   propertyType:    { type: String, required: true, enum:
-    ['Casa', 'Departamento', 'Oficina', 'Terreno', 'Salon', 'Otro']},
+    ['Casa', 'Departamento', 'Local', 'Terreno', 'Salon', 'Otro']},
   operationType:    { type: String, required: true, enum:
     ['Venta', 'Renta']},
   services: [ { type: String, required: true, enum:
@@ -37,7 +37,8 @@ var houseSchema = new Schema({
   noBathrooms:    { type: Number, required: true },
   noParking:    { type: Number, required: true },
   creationDate:     { type: Date, default: Date.now, required: true },
-  lastModification:     { type: Date, default: Date.now, required: true }
+  lastModification:     { type: Date, default: Date.now, required: true },
+  files: [{ type: mongoose.Schema.Types.ObjectId }]
 });
 
 module.exports = mongoose.model('House', houseSchema);

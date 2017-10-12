@@ -1,5 +1,6 @@
 'use strict';
 
+var mongoose = require('mongoose');  
 var HouseModel = require('./house-model');
 
 //GET - Return all houses in the DB
@@ -55,6 +56,10 @@ exports.addHouse = function(req, res) {
 
 //PUT - Update a register already exists
 exports.updateHouse = function(req, res) {  
+    //Set empty array if there are not files
+    var arrayFiles = (req.body.files && req.body.files.length > 0) ?
+        req.body.files : [];
+
     HouseModel.findById(req.params.id, function(err, house) {
         house.userId   = req.body.userId;
         house.title    = req.body.title;
@@ -70,6 +75,7 @@ exports.updateHouse = function(req, res) {
         house.noBedrooms =  req.body.noBedrooms;
         house.noBathrooms =  req.body.noBathrooms;
         house.noParking =   req.body.noParking;
+        house.files    = arrayFiles;
         house.lastModification = new Date();
 
         house.save(function(err) {
@@ -112,4 +118,35 @@ exports.getHousesByStatus = function(req, res) {
 
         res.status(200).jsonp(answer);
     });
+};
+
+//GET - Return a House with specified ID
+exports.getHouseWithFiles = function(req, res) {  
+    HouseModel.aggregate(
+        [
+            {
+                $lookup:
+                {
+                    from: 'files',
+                    localField: 'files',
+                    foreignField: '_id',
+                    as: 'filesData'
+                },
+            },
+            {
+                $match: 
+                {
+                    _id: new mongoose.Types.ObjectId(req.params.id),
+                }
+            }
+        ],
+        function(err, house) {
+            if(err){
+                return res.send(500, err.message);
+            }
+
+            res.status(200).jsonp(house);
+        }
+    );
+    
 };

@@ -1,8 +1,10 @@
 'use strict';
 var mongoose = require('mongoose');  
 var HouseFileModel = require('./house-file-model');
+var HouseModel = require('../houses/house-model');
 
 /*Helpers*/
+/*
 function deleteFilesOfHouse(houseFiles){
     //Borrar todos los archivos
     if(houseFiles.length > 0){
@@ -18,10 +20,23 @@ function deleteFilesOfHouse(houseFiles){
             });
         });
     }   
-}
+}*/
 
 function saveHouseFiles(arrayFiles, houseId, callback){
-    var arrayNewFiles = [];
+    HouseModel.findById(houseId, function(err, house) {
+        house.lastModification = new Date();
+        house.files    = arrayFiles;
+
+        console.log('house to save', house);
+        house.save(function(houseSaveError) {
+            if(houseSaveError){
+                console.log(houseSaveError);
+            }
+            callback(house);
+        });
+    });
+
+    /*var arrayNewFiles = [];
     var filesToSave = arrayFiles.length;
     
     arrayFiles.forEach(function(fileId) {
@@ -46,7 +61,7 @@ function saveHouseFiles(arrayFiles, houseId, callback){
                 //res.status(200).jsonp(arrayNewFiles);
             }
         });
-    });
+    });*/
 }
 
 //GET - Return all house files in the DB
@@ -138,7 +153,7 @@ exports.saveFilesOfHouse = function(req, res) {
 //PUT - Update the files of a house. First delete the old files, after save all files like they are news
 exports.updateFilesOfHouse = function(req, res) {  
     var houseId = req.params.houseId;
-
+    /*
     HouseFileModel.find({
         houseId: new mongoose.Types.ObjectId(houseId)
     })
@@ -161,7 +176,18 @@ exports.updateFilesOfHouse = function(req, res) {
             res.status(200).jsonp(savedFilesArray);
         });
         
-    });
+    });*/
+
+    var arrayFiles = req.body.files;
+    var filesToSave = arrayFiles.length;
+
+    if(filesToSave === 0){
+        res.status(200).jsonp([]);
+    }
+
+    saveHouseFiles(arrayFiles, houseId, function(savedFilesArray){
+            res.status(200).jsonp(savedFilesArray);
+        });
 };
 
 //DELETE - Delete a House file with specified ID
