@@ -9,7 +9,7 @@ router.route('/houses')
 	.post(houseCtrl.addHouse);
 
 router.route('/house/:id')
-	.get(houseCtrl.getHouseWithFiles)
+	.get(houseCtrl.getById)
 	.put(houseCtrl.updateHouse)
 	.delete(houseCtrl.deleteHouse);
 
@@ -18,5 +18,8 @@ router.route('/houses/byStatus/:status')
 
 router.route('/houses/filter')
 	.get(houseFilterCtrl.getHousesByFilters);
+
+router.route('/house-with-files/:id')
+	.get(houseCtrl.getHouseWithFiles);
 
 module.exports = router;

@@ -28,6 +28,9 @@ exports.getById = function(req, res) {
 
 //POST - Insert a new House in the DB
 exports.addHouse = function(req, res) {  
+    //Set empty array if there are not files
+    var arrayFiles = (req.body.files && req.body.files.length > 0) ?
+        req.body.files : [];
 
     var newHouse = new HouseModel({
         userId:    req.body.userId,
@@ -43,7 +46,8 @@ exports.addHouse = function(req, res) {
         contact:   req.body.contact,
         noBedrooms:  req.body.noBedrooms,
         noBathrooms:  req.body.noBathrooms,
-        noParking:   req.body.noParking
+        noParking:   req.body.noParking,
+        files: arrayFiles
     });
 
     newHouse.save(function(err, house) {
@@ -60,6 +64,8 @@ exports.updateHouse = function(req, res) {
     var arrayFiles = (req.body.files && req.body.files.length > 0) ?
         req.body.files : [];
 
+    //TODO: Borrar fisicamente los archivos que se habían agregado anteriormente a esta casa
+    //Y que en el update ya no se incluyen
     HouseModel.findById(req.params.id, function(err, house) {
         house.userId   = req.body.userId;
         house.title    = req.body.title;
