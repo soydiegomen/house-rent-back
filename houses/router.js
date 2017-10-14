@@ -1,8 +1,10 @@
 'use strict';
 
 var houseCtrl = require('./house');
-var houseFilterCtrl = require('./house-filter');
+var publishedHouseCtrl = require('./published-house');
 var router = require('express').Router();
+
+/*Services used for admin*/
 
 router.route('/houses')
 	.get(houseCtrl.getAllHouses)
@@ -16,10 +18,12 @@ router.route('/house/:id')
 router.route('/houses/byStatus/:status')
 	.get(houseCtrl.getHousesByStatus);
 
-router.route('/houses/filter')
-	.get(houseFilterCtrl.getHousesByFilters);
-
 router.route('/house-with-files/:id')
 	.get(houseCtrl.getHouseWithFiles);
+
+/*Services used for main app*/
+
+router.route('/published-houses')
+	.get(publishedHouseCtrl.getPublishedHouses);
 
 module.exports = router;
