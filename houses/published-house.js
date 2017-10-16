@@ -5,6 +5,10 @@ var HouseModel = require('./house-model');
 
 //GET - Return a House with specified ID
 exports.getPublishedHouses = function(req, res) {  
+    
+    //Build the filters using query string parametters
+    var filters = buildJSONFilter(req);
+
     HouseModel.aggregate(
         [
             {
@@ -18,11 +22,7 @@ exports.getPublishedHouses = function(req, res) {
                 }
             },
             {
-                $match: 
-                {
-                    //Solo las casas publicadas
-                    status: 'Publicado'
-                }
+                $match: filters
             },
             { 
                 $sort : 
@@ -42,6 +42,48 @@ exports.getPublishedHouses = function(req, res) {
     );
     
 };
+
+/*
+Helpers
+*/
+function buildJSONFilter(req){
+    //Published is the default status
+    var status = 'Publicado'; 
+    var propertyType = req.query.property; 
+    var operationType = req.query.operation; 
+    var greater = req.query.greater; 
+    var least = req.query.least;
+    var search = req.query.search; 
+
+    var filters = {
+        status: status
+    };
+
+    if(propertyType){
+        filters.propertyType = propertyType;
+    }
+
+    if(operationType){
+        filters.operationType = operationType;
+    }
+
+    if(greater && least){
+        filters.price = { $gt: Number(greater), $lt: Number(least) };
+    }
+
+    if(search){
+        var likeRegEx = new RegExp(search, 'i');
+        filters.$or = [ 
+            { title: likeRegEx } , 
+            { summary: likeRegEx }, 
+            { 'address.address': likeRegEx }, 
+            { 'contact.name': likeRegEx } 
+        ];
+    }
+
+
+    return filters;
+}
 
 /*
 db.getCollection('houses').aggregate(
