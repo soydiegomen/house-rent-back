@@ -59,15 +59,15 @@ function buildJSONFilter(req){
         status: status
     };
 
-    if(propertyType){
+    if(propertyType && propertyType.length > 0){
         filters.propertyType = propertyType;
     }
 
-    if(operationType){
+    if(operationType && operationType.length > 0){
         filters.operationType = operationType;
     }
 
-    if(greater && least){
+    if(greater && (least && least > 0)){
         filters.price = { $gt: Number(greater), $lt: Number(least) };
     }
 
