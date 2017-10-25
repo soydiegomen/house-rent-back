@@ -61,8 +61,8 @@ function buildJSONFilter(req){
     var status = 'Publicado'; 
     var propertyType = req.query.property; 
     var operationType = req.query.operation; 
-    var greater = req.query.greater; 
-    var least = req.query.least;
+    var min = req.query.min; 
+    var max = req.query.max;
     var search = req.query.search; 
 
     var filters = {
@@ -77,8 +77,8 @@ function buildJSONFilter(req){
         filters.operationType = operationType;
     }
 
-    if(greater && (least && least > 0)){
-        filters.price = { $gt: Number(greater), $lt: Number(least) };
+    if(max && max > 0 && min){
+        filters.price = { $gt: Number(min), $lt: Number(max) };
     }
 
     if(search){
