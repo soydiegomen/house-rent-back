@@ -18,6 +18,7 @@ router.route('/house/:id')
 router.route('/houses/byStatus/:status')
 	.get(houseCtrl.getHousesByStatus);
 
+/*Obtiene el modelo house y sus archivos (filtra por el id de la casa)*/
 router.route('/house-with-files/:id')
 	.get(houseCtrl.getHouseWithFiles);
 
