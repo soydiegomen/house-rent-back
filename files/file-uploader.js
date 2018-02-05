@@ -2,7 +2,7 @@
 
 var FileModel = require('./file-model');
 var multer  =   require('multer');
-var sharp = require('sharp');
+//var sharp = require('sharp');
 var fs = require('fs');
 
 //Class variables
@@ -126,7 +126,11 @@ var upload = multer({
 function resizeImage(filePath, fileName, tempFileName){
     
     var fileToResize = filePath + '/' + fileName;
+    console.log("#### Saved file");
+    console.log(fileToResize);
     var fileDestiny = filePath + '/' + tempFileName;
+    //Comente el uso de Sharp ya que requiere actualizar el modulo a una versión más reciente de node
+    /*
     return sharp(fileToResize)
       .resize(800)
       .toFile(fileDestiny)
@@ -136,7 +140,7 @@ function resizeImage(filePath, fileName, tempFileName){
       })
       .catch( function(err) {
         console.log('Some error happend', err);
-      });
+      });*/
 }
 
 
@@ -148,6 +152,8 @@ exports.uploadFile = function(req, res) {
             return res.status(500).jsonp({ error : err.message });
         }else{
             
+            //Comente estas lineas en lo que hago el upgrade de Sharp
+            /*
             //Si no hubo errores se redimenciona la imagen
             resizeImage( req.body.destinationPath, 
                 req.body.newFileName,
@@ -156,6 +162,12 @@ exports.uploadFile = function(req, res) {
                 //Return saved file data
                 res.status(200).jsonp( req.body.savedFile );            
             });
+            */
+            resizeImage( req.body.destinationPath, 
+                req.body.newFileName,
+                req.body.tempFileName );
+            console.log('Savedfile: ' + req.body.savedFile);
+            res.status(200).jsonp( req.body.savedFile );            
         }
         
     });
