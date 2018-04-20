@@ -9,21 +9,9 @@ exports.getPublishedHouses = function(req, res) {
 
     //Build the filters using query string parametters
     var filters = buildJSONFilter(req);
-    //[left or rigth]
-    let pagDirection = req.query.pagDirection;
-    let sortJSON = null
-    if(pagDirection === 'rigth' ){
-      sortJSON = {
-          //Ordenadas de forma descendiente (lastModification)
-          lastModification : -1
-      };
-    }else{
-      //Left case
-      sortJSON = {
-          //Ordenadas de forma ascendiente (lastModification)
-          lastModification : 1
-      };
-    }
+
+    //Determina el ordenamiento dependiendo el sentido de la páginación
+    let sortJSON = buildJSONSorter(req);
 
     HouseModel.aggregate(
         [
@@ -62,6 +50,14 @@ exports.getPublishedHouses = function(req, res) {
                 return res.send(500, err.message);
             }
 
+            //Ordeno el listado de casas de forma descendiente con base en la fecha de la última actualización
+            //TODO: el ordenamiento solo debería hacerse cuando la páginación es hacia la izquierda
+            let sortedHouses = house.sort(function(a,b){
+              // Turn your strings into dates, and then subtract them
+              // to get a value that is either negative, positive, or zero.
+              return new Date(b.lastModification) - new Date(a.lastModification);
+            });
+
             res.status(200).jsonp(house);
         }
     );
@@ -71,6 +67,20 @@ exports.getPublishedHouses = function(req, res) {
 /*
 Helpers
 */
+
+function buildJSONSorter(req){
+    let sortJSON = null;
+    if(req.query.pagDirection === 'rigth' || !req.query.pagDirection){
+      //Default case. Ordenadas de forma descendiente (lastModification)
+      sortJSON = { lastModification : -1 };
+    }else{
+      //Ordenadas de forma ascendiente (lastModification)
+      sortJSON = { lastModification : 1 };
+    }
+
+    return sortJSON;
+}
+
 function buildJSONFilter(req){
     //Published is the default status
     var status = 'Publicado';
@@ -79,26 +89,12 @@ function buildJSONFilter(req){
     var min = req.query.min;
     var max = req.query.max;
     var search = req.query.search;
-    //Next result page
+    //Pagination parametters
     let itemLastDate = req.query.itemLastDate;
     let pagDirection = req.query.pagDirection;
-    //var datePagination = '2018-04-17 03:36:23.865Z';
-
-    let paginationFilter = null;
-    if(pagDirection === 'rigth' ){
-      paginationFilter = {
-          $lte : new Date(itemLastDate)
-      }
-    }else{
-      //Left case
-      paginationFilter = {
-          $gte : new Date(itemLastDate)
-      }
-    }
 
     var filters = {
-        status: status,
-        lastModification: paginationFilter
+        status: status
     };
 
     if(propertyType && propertyType.length > 0){
@@ -122,6 +118,23 @@ function buildJSONFilter(req){
             { 'contact.name': likeRegEx }
         ];
     }
+
+    //paginationFilter
+    let paginationFilter = null;
+    if(pagDirection === 'rigth' || !pagDirection){
+      //Default case. Navegación a la derecha
+      filters.lastModification = {
+          //Si no trae fecha utilizar la fecha actual
+          $lte : (itemLastDate ? new Date(itemLastDate) : new Date())
+      }
+    }else{
+      //Navegación a la izquierda
+      filters.lastModification = {
+          //Si no trae fecha utilizar la fecha actual
+          $gte : new Date(itemLastDate)
+      }
+    }
+
 
 
     return filters;
