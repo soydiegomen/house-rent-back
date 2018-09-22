@@ -90,7 +90,7 @@ function buildJSONFilter(req){
     var max = req.query.max;
     var search = req.query.search;
     //Pagination parametters
-    let itemLastDate = req.query.itemLastDate;
+    let itemLastDate = req.query.itemLastDate ? new Date(req.query.itemLastDate) : new Date();;
     let pagDirection = req.query.pagDirection;
 
     var filters = {
@@ -121,17 +121,26 @@ function buildJSONFilter(req){
 
     //paginationFilter
     let paginationFilter = null;
-    if(pagDirection === 'rigth' || !pagDirection){
+    if(!pagDirection || pagDirection === 'rigth'){
       //Default case. Navegación a la derecha
+      //A la fecha se debe restar un segundo, ya que en la app se envía la fecha de la última casas
+      //que se muestra, entonces para excluirla es fecha menos un segundo
+      let dateFilter = new Date(itemLastDate.getTime() - 1000);
       filters.lastModification = {
           //Si no trae fecha utilizar la fecha actual
-          $lte : (itemLastDate ? new Date(itemLastDate) : new Date())
+          //Obtendrá las casas que se hayan creado en una fecha menor a la recibida.
+          $lte : dateFilter
       }
     }else{
       //Navegación a la izquierda
+      //Left case
+      //A la fecha se debe sumar un segundo, ya que en la app se envía la fecha de la última casas
+      //que se muestra, entonces para excluirla es fecha mas un segundo
+      let dateFilter = new Date(itemLastDate.getTime() + 1000);
       filters.lastModification = {
           //Si no trae fecha utilizar la fecha actual
-          $gte : new Date(itemLastDate)
+          //Obtendrá las casas que se hayan creado posterior a la fecha recibida.
+          $gte : itemLastDate
       }
     }
 
