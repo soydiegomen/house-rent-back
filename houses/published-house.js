@@ -13,6 +13,9 @@ exports.getPublishedHouses = function(req, res) {
     //Determina el ordenamiento dependiendo el sentido de la páginación
     let sortJSON = buildJSONSorter(req);
 
+    //Define Page Size
+    const pageSize = req.query.pageSize ? Number(req.query.pageSize) : PAGE_SIZE;
+
     HouseModel.aggregate(
         [
             {
@@ -42,7 +45,7 @@ exports.getPublishedHouses = function(req, res) {
                 $sort : sortJSON
             },
             {
-                $limit : PAGE_SIZE
+                $limit : pageSize
             }
         ],
         function(err, house) {
