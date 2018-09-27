@@ -143,7 +143,7 @@ function buildJSONFilter(req){
       filters.lastModification = {
           //Si no trae fecha utilizar la fecha actual
           //Obtendrá las casas que se hayan creado posterior a la fecha recibida.
-          $gte : itemLastDate
+          $gte : dateFilter
       }
     }
 
