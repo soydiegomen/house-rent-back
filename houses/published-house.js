@@ -151,3 +151,62 @@ function buildJSONFilter(req){
 
     return filters;
 }
+
+//GET -Count total of items with the current filters
+exports.countPublishedHouses = function(req, res) {
+
+    //Build the filters using query string parametters
+    var filters = buildJSONFilter(req);
+    //Delete filter used for pagination. For count is not necesary
+    delete filters.lastModification;
+    //Determina el ordenamiento dependiendo el sentido de la páginación
+    let sortJSON = buildJSONSorter(req);
+
+    HouseModel.aggregate(
+        [
+            {
+                //Incluye la información de los archivos
+                $lookup:
+                {
+                    from: 'files',
+                    localField: 'files',
+                    foreignField: '_id',
+                    as: 'filesData'
+                }
+            },
+            {
+                //Incluye la información de las metricas
+                $lookup:
+                {
+                    from: 'housemetrics',
+                    localField: '_id',
+                    foreignField: 'houseId',
+                    as: 'metrics'
+                }
+            },
+            {
+                $match: filters,
+            },
+            {
+                $sort : sortJSON
+            },
+            { $count: "size" }
+        ],
+        function(err, house) {
+            if(err){
+                return res.send(500, err.message);
+            }
+
+            //Ordeno el listado de casas de forma descendiente con base en la fecha de la última actualización
+            //TODO: el ordenamiento solo debería hacerse cuando la páginación es hacia la izquierda
+            let sortedHouses = house.sort(function(a,b){
+              // Turn your strings into dates, and then subtract them
+              // to get a value that is either negative, positive, or zero.
+              return new Date(b.lastModification) - new Date(a.lastModification);
+            });
+
+            res.status(200).jsonp(house);
+        }
+    );
+
+};

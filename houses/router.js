@@ -24,7 +24,15 @@ router.route('/house-with-files/:id')
 
 /*Services used for main app*/
 
+/*Obtiene las casas publicadas para mostrarlas en el home.
+Estas casas pueden filtrarse utilizando varios criterios y también implementa paginación*/
 router.route('/published-houses')
 	.get(publishedHouseCtrl.getPublishedHouses);
+
+	/*Obtiene el número de casas publicadas.
+	Estas casas pueden filtrarse utilizando varios criterios.
+	Sirve para saber el número de elementos obtenidos en el servicio published-houses*/
+router.route('/published-houses/count')
+		.get(publishedHouseCtrl.countPublishedHouses);
 
 module.exports = router;
