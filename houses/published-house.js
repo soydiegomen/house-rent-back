@@ -7,14 +7,94 @@ const PAGE_SIZE = 2;
 //GET - Return a House with specified ID
 exports.getPublishedHouses = function(req, res) {
 
+  countPublishedHouses(req, res, function (totalItems) {
+
+    //TODO: Si el totalItems is igual a 0 ya no debería hacerse la siguiente consulta
+    getHouses(req, res, function(houseList) {
+
+      const jsonResponse = {
+        items : houseList,
+        totalItems
+      }
+
+      //Retorna el JSON con la lista de Items y el número total de items
+      res.status(200).jsonp(jsonResponse);
+
+    });
+
+  });
+};
+
+//Hace la consulta para obtener todas las casas publicadas
+function getHouses(req, res, callback) {
+  //Build the filters using query string parametters
+  var filters = buildJSONFilter(req);
+
+  //Determina el ordenamiento dependiendo el sentido de la páginación
+  let sortJSON = buildJSONSorter(req);
+
+  //Define Page Size
+  const pageSize = req.query.pageSize ? Number(req.query.pageSize) : PAGE_SIZE;
+
+  HouseModel.aggregate(
+      [
+          {
+              //Incluye la información de los archivos
+              $lookup:
+              {
+                  from: 'files',
+                  localField: 'files',
+                  foreignField: '_id',
+                  as: 'filesData'
+              }
+          },
+          {
+              //Incluye la información de las metricas
+              $lookup:
+              {
+                  from: 'housemetrics',
+                  localField: '_id',
+                  foreignField: 'houseId',
+                  as: 'metrics'
+              }
+          },
+          {
+              $match: filters,
+          },
+          {
+              $sort : sortJSON
+          },
+          {
+              $limit : pageSize
+          }
+      ], function (err, houseList){
+
+        if(err){
+            return res.send(500, err.message);
+        }
+
+        //Ordeno el listado de casas de forma descendiente con base en la fecha de la última actualización
+        //TODO: el ordenamiento solo debería hacerse cuando la páginación es hacia la izquierda
+        let sortedHouses = houseList.sort(function(a,b){
+          // Turn your strings into dates, and then subtract them
+          // to get a value that is either negative, positive, or zero.
+          return new Date(b.lastModification) - new Date(a.lastModification);
+        });
+
+        callback(houseList);
+
+      });
+}
+
+//Cuenta cuantas casas hay con los filtros seleccionados
+function countPublishedHouses(req, res, callback) {
+
     //Build the filters using query string parametters
     var filters = buildJSONFilter(req);
-
+    //Delete filter used for pagination. For count is not necesary
+    delete filters.lastModification;
     //Determina el ordenamiento dependiendo el sentido de la páginación
     let sortJSON = buildJSONSorter(req);
-
-    //Define Page Size
-    const pageSize = req.query.pageSize ? Number(req.query.pageSize) : PAGE_SIZE;
 
     HouseModel.aggregate(
         [
@@ -44,33 +124,27 @@ exports.getPublishedHouses = function(req, res) {
             {
                 $sort : sortJSON
             },
-            {
-                $limit : pageSize
-            }
+            { $count: "size" }
         ],
-        function(err, house) {
+        function(err, arrayTotals) {
             if(err){
                 return res.send(500, err.message);
             }
 
-            //Ordeno el listado de casas de forma descendiente con base en la fecha de la última actualización
-            //TODO: el ordenamiento solo debería hacerse cuando la páginación es hacia la izquierda
-            let sortedHouses = house.sort(function(a,b){
-              // Turn your strings into dates, and then subtract them
-              // to get a value that is either negative, positive, or zero.
-              return new Date(b.lastModification) - new Date(a.lastModification);
-            });
+            let totalItems = 0;
+            if(arrayTotals.length > 0){
+              totalItems = arrayTotals[0].size;
+            }
 
-            res.status(200).jsonp(house);
+            callback(totalItems);
         }
     );
 
-};
+}
 
 /*
 Helpers
 */
-
 function buildJSONSorter(req){
     let sortJSON = null;
     if(req.query.pagDirection === 'rigth' || !req.query.pagDirection){
@@ -151,62 +225,3 @@ function buildJSONFilter(req){
 
     return filters;
 }
-
-//GET -Count total of items with the current filters
-exports.countPublishedHouses = function(req, res) {
-
-    //Build the filters using query string parametters
-    var filters = buildJSONFilter(req);
-    //Delete filter used for pagination. For count is not necesary
-    delete filters.lastModification;
-    //Determina el ordenamiento dependiendo el sentido de la páginación
-    let sortJSON = buildJSONSorter(req);
-
-    HouseModel.aggregate(
-        [
-            {
-                //Incluye la información de los archivos
-                $lookup:
-                {
-                    from: 'files',
-                    localField: 'files',
-                    foreignField: '_id',
-                    as: 'filesData'
-                }
-            },
-            {
-                //Incluye la información de las metricas
-                $lookup:
-                {
-                    from: 'housemetrics',
-                    localField: '_id',
-                    foreignField: 'houseId',
-                    as: 'metrics'
-                }
-            },
-            {
-                $match: filters,
-            },
-            {
-                $sort : sortJSON
-            },
-            { $count: "size" }
-        ],
-        function(err, house) {
-            if(err){
-                return res.send(500, err.message);
-            }
-
-            //Ordeno el listado de casas de forma descendiente con base en la fecha de la última actualización
-            //TODO: el ordenamiento solo debería hacerse cuando la páginación es hacia la izquierda
-            let sortedHouses = house.sort(function(a,b){
-              // Turn your strings into dates, and then subtract them
-              // to get a value that is either negative, positive, or zero.
-              return new Date(b.lastModification) - new Date(a.lastModification);
-            });
-
-            res.status(200).jsonp(house);
-        }
-    );
-
-};

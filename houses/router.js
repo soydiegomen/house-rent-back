@@ -29,10 +29,5 @@ Estas casas pueden filtrarse utilizando varios criterios y también implementa p
 router.route('/published-houses')
 	.get(publishedHouseCtrl.getPublishedHouses);
 
-	/*Obtiene el número de casas publicadas.
-	Estas casas pueden filtrarse utilizando varios criterios.
-	Sirve para saber el número de elementos obtenidos en el servicio published-houses*/
-router.route('/published-houses/count')
-		.get(publishedHouseCtrl.countPublishedHouses);
 
 module.exports = router;
