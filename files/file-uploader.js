@@ -126,7 +126,11 @@ var upload = multer({
 function resizeImage(filePath, fileName, tempFileName){
     
     var fileToResize = filePath + '/' + fileName;
+    console.log("#### Saved file");
+    console.log(fileToResize);
     var fileDestiny = filePath + '/' + tempFileName;
+    
+    //Resize image using Sharp module
     return sharp(fileToResize)
       .resize(800)
       .toFile(fileDestiny)
@@ -155,7 +159,7 @@ exports.uploadFile = function(req, res) {
             .then(function (){
                 //Return saved file data
                 res.status(200).jsonp( req.body.savedFile );            
-            });
+            });        
         }
         
     });
