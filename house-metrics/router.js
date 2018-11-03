@@ -4,7 +4,7 @@ var houseMetCtrl = require('./house-metric');
 var router = require('express').Router();
 
 router.route('/house-metrics')
-	.get(houseMetCtrl.getAllHouseMetrics)
+	.get(houseMetCtrl.getHouseMetrics)
 	.post(houseMetCtrl.addHouseMetric);
 
 router.route('/house-metric/:id')

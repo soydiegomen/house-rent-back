@@ -1,11 +1,11 @@
 'use strict';
-
+var mongoose = require('mongoose');  
 var HouseMetModel = require('./house-metric-model');
 
 //GET - Return all houseMet in the DB
-exports.getAllHouseMetrics = function(req, res) {  
+exports.getAllHouseMetrics = function(req, res) {
     HouseMetModel.find(function(err, houseMet) {
-        if(err) 
+        if(err)
             res.send(500, err.message);
 
         console.log('GET /houseMet');
@@ -14,9 +14,9 @@ exports.getAllHouseMetrics = function(req, res) {
 };
 
 //GET - Return a House Metric with specified ID
-exports.getById = function(req, res) {  
+exports.getById = function(req, res) {
     HouseMetModel.findById(req.params.id, function(err, houseMet) {
-        if(err) 
+        if(err)
             return res.send(500, err.message);
 
         console.log('GET /houseMet/' + req.params.id);
@@ -24,8 +24,26 @@ exports.getById = function(req, res) {
     });
 };
 
+//GET - Return all houseMet in the DB
+exports.getHouseMetrics = function(req, res) {
+    var filters = req.query.houseId ?
+      {
+        houseId : new mongoose.Types.ObjectId(req.query.houseId)
+      }
+      : {};
+
+    HouseMetModel.find(filters)
+    .exec(function(err, metrics) {
+        if(err){
+            res.send(500, err.message);
+        }
+
+        res.status(200).jsonp(metrics);
+    });
+};
+
 //POST - Insert a new House Metric in the DB
-exports.addHouseMetric = function(req, res) {  
+exports.addHouseMetric = function(req, res) {
     console.log('POST');
     console.log(req.body);
 
@@ -36,21 +54,21 @@ exports.addHouseMetric = function(req, res) {
     });
 
     newHouseMet.save(function(err, houseMet) {
-        if(err) 
+        if(err)
             return res.status(500).send( err.message);
         res.status(200).jsonp(houseMet);
     });
 };
 
 //PUT - Update a register already exists
-exports.updateHouseMetric = function(req, res) {  
+exports.updateHouseMetric = function(req, res) {
     HouseMetModel.findById(req.params.id, function(err, houseMet) {
         houseMet.views   = req.body.views;
         houseMet.likes    = req.body.likes;
         houseMet.lastModification = new Date();
 
         houseMet.save(function(err) {
-            if(err) 
+            if(err)
                 return res.status(500).send(err.message);
             res.status(200).jsonp(houseMet);
         });
@@ -58,10 +76,10 @@ exports.updateHouseMetric = function(req, res) {
 };
 
 //DELETE - Delete a House Metric with specified ID
-exports.deleteHouseMetric = function(req, res) {  
+exports.deleteHouseMetric = function(req, res) {
     HouseMetModel.findById(req.params.id, function(err, houseMet) {
         houseMet.remove(function(err) {
-            if(err) 
+            if(err)
                 return res.status(500).send(err.message);
             res.status(200).send();
         });
