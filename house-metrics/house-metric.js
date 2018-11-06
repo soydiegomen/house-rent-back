@@ -1,5 +1,5 @@
 'use strict';
-var mongoose = require('mongoose');  
+var mongoose = require('mongoose');
 var HouseMetModel = require('./house-metric-model');
 
 //GET - Return all houseMet in the DB
@@ -44,9 +44,6 @@ exports.getHouseMetrics = function(req, res) {
 
 //POST - Insert a new House Metric in the DB
 exports.addHouseMetric = function(req, res) {
-    console.log('POST');
-    console.log(req.body);
-
     var newHouseMet = new HouseMetModel({
         houseId:  req.body.houseId,
         views:    req.body.views,
@@ -84,4 +81,48 @@ exports.deleteHouseMetric = function(req, res) {
             res.status(200).send();
         });
     });
+};
+
+/*AddLike*/
+//PUT - Update a register already exists
+exports.addLike = function(req, res) {
+
+  HouseMetModel.find({
+    houseId : req.params.id
+  })
+  .exec(function(err, metrics) {
+      if(err){
+          res.send(500, err.message);
+      }
+
+      if(metrics.length > 0){
+        //Este caso es para cuando ya tiene una metrica registrada
+        let houseMetric = metrics[0];
+        //Increase likes of house
+        houseMetric.likes = (houseMetric.likes + 1);
+        houseMetric.lastModification = new Date();
+
+        //Update house metric
+        houseMetric.save(function(saveError) {
+            if(saveError){
+              return res.status(500).send(saveError.message);
+            }
+
+            res.status(200).jsonp(houseMetric);
+        });
+      }else{
+          //Este caso es para cuando no tiene una metrica registrada
+          var newHouseMet = new HouseMetModel({
+              houseId:  req.params.id,
+              views:    0,//default
+              likes:  1//first like
+          });
+
+          newHouseMet.save(function(err, houseMet) {
+              if(err)
+                  return res.status(500).send( err.message);
+              res.status(200).jsonp(houseMet);
+          });
+      }
+  });
 };
