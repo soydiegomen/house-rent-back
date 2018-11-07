@@ -13,7 +13,7 @@ router.route('/house-metric/:id')
 	.delete(houseMetCtrl.deleteHouseMetric);
 
 
-router.route('/house-metrics/addLike/:id')
+router.route('/houseLike/:id')
 		.put(houseMetCtrl.addLike);
 
 module.exports = router;

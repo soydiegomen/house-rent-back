@@ -8,7 +8,6 @@ exports.getAllHouseMetrics = function(req, res) {
         if(err)
             res.send(500, err.message);
 
-        console.log('GET /houseMet');
         res.status(200).jsonp(houseMet);
     });
 };
@@ -19,27 +18,29 @@ exports.getById = function(req, res) {
         if(err)
             return res.send(500, err.message);
 
-        console.log('GET /houseMet/' + req.params.id);
         res.status(200).jsonp(houseMet);
     });
 };
 
 //GET - Return all houseMet in the DB
 exports.getHouseMetrics = function(req, res) {
-    var filters = req.query.houseId ?
-      {
-        houseId : new mongoose.Types.ObjectId(req.query.houseId)
-      }
-      : {};
+  var filters = req.query.houseId ?
+    {
+      houseId : new mongoose.Types.ObjectId(req.query.houseId)
+    }
+    : {};
 
-    HouseMetModel.find(filters)
-    .exec(function(err, metrics) {
-        if(err){
-            res.send(500, err.message);
-        }
-
-        res.status(200).jsonp(metrics);
-    });
+  HouseMetModel.find(filters)
+  .then(
+    function (metrics){
+      res.status(200).jsonp(metrics);
+    }
+  )
+  .catch(
+    function (err){
+      res.send(500, err.message);
+    }
+  )
 };
 
 //POST - Insert a new House Metric in the DB
@@ -50,11 +51,7 @@ exports.addHouseMetric = function(req, res) {
         likes:  req.body.likes
     });
 
-    newHouseMet.save(function(err, houseMet) {
-        if(err)
-            return res.status(500).send( err.message);
-        res.status(200).jsonp(houseMet);
-    });
+    saveHouseMetric(newHouseMet, res);
 };
 
 //PUT - Update a register already exists
@@ -64,11 +61,7 @@ exports.updateHouseMetric = function(req, res) {
         houseMet.likes    = req.body.likes;
         houseMet.lastModification = new Date();
 
-        houseMet.save(function(err) {
-            if(err)
-                return res.status(500).send(err.message);
-            res.status(200).jsonp(houseMet);
-        });
+        saveHouseMetric(houseMet, res);
     });
 };
 
@@ -84,45 +77,43 @@ exports.deleteHouseMetric = function(req, res) {
 };
 
 /*AddLike*/
-//PUT - Update a register already exists
 exports.addLike = function(req, res) {
-
   HouseMetModel.find({
     houseId : req.params.id
   })
-  .exec(function(err, metrics) {
-      if(err){
-          res.send(500, err.message);
-      }
+  .then( function (metrics){
+    if(metrics.length > 0){
+      //Este caso es para cuando ya tiene una metrica registrada
+      let houseMetric = metrics[0];
+      //Increase likes of house
+      houseMetric.likes = (houseMetric.likes + 1);
+      houseMetric.lastModification = new Date();
 
-      if(metrics.length > 0){
-        //Este caso es para cuando ya tiene una metrica registrada
-        let houseMetric = metrics[0];
-        //Increase likes of house
-        houseMetric.likes = (houseMetric.likes + 1);
-        houseMetric.lastModification = new Date();
+      saveHouseMetric(houseMetric, res);
 
-        //Update house metric
-        houseMetric.save(function(saveError) {
-            if(saveError){
-              return res.status(500).send(saveError.message);
-            }
+    }else{
+      //Este caso es para cuando no tiene una metrica registrada
+      var newHouseMet = new HouseMetModel({
+          houseId:  req.params.id,
+          views:    0,//default
+          likes:  1//first like
+      });
 
-            res.status(200).jsonp(houseMetric);
-        });
-      }else{
-          //Este caso es para cuando no tiene una metrica registrada
-          var newHouseMet = new HouseMetModel({
-              houseId:  req.params.id,
-              views:    0,//default
-              likes:  1//first like
-          });
-
-          newHouseMet.save(function(err, houseMet) {
-              if(err)
-                  return res.status(500).send( err.message);
-              res.status(200).jsonp(houseMet);
-          });
-      }
+      saveHouseMetric(newHouseMet, res);
+    }
+  })
+  .catch( function (err){
+    res.send(500, err.message);
   });
 };
+
+//Function for save a House Metric
+function saveHouseMetric(houseMetric, res){
+  houseMetric.save()
+  .then( function (){
+    return res.status(200).jsonp(houseMetric);
+  })
+  .catch(function (saveError){
+    return res.status(500).send(saveError.message);
+  });
+}
