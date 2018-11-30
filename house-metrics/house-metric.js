@@ -76,31 +76,80 @@ exports.deleteHouseMetric = function(req, res) {
     });
 };
 
-/*AddLike*/
-exports.addLike = function(req, res) {
+/*
+Add like
+*/
+exports.addMetric = function(req, res) {
   HouseMetModel.find({
     houseId : req.params.id
   })
   .then( function (metrics){
+    let houseMetric = {};
+
     if(metrics.length > 0){
       //Este caso es para cuando ya tiene una metrica registrada
-      let houseMetric = metrics[0];
-      //Increase likes of house
-      houseMetric.likes = (houseMetric.likes + 1);
-      houseMetric.lastModification = new Date();
-
-      saveHouseMetric(houseMetric, res);
-
+      houseMetric = metrics[0];
     }else{
       //Este caso es para cuando no tiene una metrica registrada
-      var newHouseMet = new HouseMetModel({
+      houseMetric = new HouseMetModel({
           houseId:  req.params.id,
-          views:    0,//default
-          likes:  1//first like
+          views:    0,
+          likes:  0
       });
-
-      saveHouseMetric(newHouseMet, res);
     }
+
+    //Increase [likes, views] of house
+    switch (req.body.type) {
+      case "likes":
+        houseMetric.likes++;
+        break;
+      case "views":
+        houseMetric.views++;
+        break;
+    }
+
+    houseMetric.lastModification = new Date();
+    saveHouseMetric(houseMetric, res);
+
+  })
+  .catch( function (err){
+    res.send(500, err.message);
+  });
+};
+
+/*
+Remove like
+*/
+exports.removeMetric = function(req, res) {
+  HouseMetModel.find({
+    houseId : req.params.id
+  })
+  .then( function (metrics){
+    let houseMetric = {};
+    if(metrics.length > 0){
+      //Este caso es para cuando ya tiene una metrica registrada
+      houseMetric = metrics[0];
+
+      //Increase likes of house
+      if(houseMetric.likes > 0){
+        //Increase [likes, views] of house
+        switch (req.body.type) {
+          case "likes":
+            houseMetric.likes--;
+            break;
+          case "views":
+            houseMetric.views--;
+            break;
+        }
+
+        houseMetric.lastModification = new Date();
+
+        saveHouseMetric(houseMetric, res);
+        return;
+      }
+    }
+    //Else does not need create a metric row
+    return res.status(200).jsonp(houseMetric);
   })
   .catch( function (err){
     res.send(500, err.message);
